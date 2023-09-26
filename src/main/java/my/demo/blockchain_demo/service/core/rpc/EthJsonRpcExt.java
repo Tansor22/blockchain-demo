@@ -20,10 +20,16 @@ public class EthJsonRpcExt extends JsonRpc2_0Web3j {
         return response.getTransactionCount();
     }
 
-    public BigInteger getChainId() throws IOException {
+    public BigInteger getBalance(String address) throws IOException {
+        var response = this.ethGetBalance(address, DefaultBlockParameterName.LATEST).send();
+        checkResponse(response);
+        return response.getBalance();
+    }
+
+    public long getChainId() throws IOException {
         var response = this.ethChainId().send();
         checkResponse(response);
-        return response.getChainId();
+        return response.getChainId().longValue();
     }
 
     public String sendTransaction(String transaction) throws IOException {
