@@ -5,6 +5,7 @@ import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.JsonRpc2_0Web3j;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.EthBlock;
+import org.web3j.protocol.core.methods.response.Transaction;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -30,6 +31,12 @@ public class EthJsonRpcExt extends JsonRpc2_0Web3j {
         var response = this.ethChainId().send();
         checkResponse(response);
         return response.getChainId().longValue();
+    }
+
+    public Transaction getTransaction(String hash) throws IOException {
+        var response = this.ethGetTransactionByHash(hash).send();
+        checkResponse(response);
+        return response.getTransaction().orElse(null);
     }
 
     public String sendTransaction(String transaction) throws IOException {

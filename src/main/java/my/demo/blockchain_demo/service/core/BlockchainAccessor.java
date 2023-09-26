@@ -3,6 +3,7 @@ package my.demo.blockchain_demo.service.core;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.configuration.AppConfiguration;
+import my.demo.blockchain_demo.service.core.domain.MakeTrade;
 import my.demo.blockchain_demo.service.core.rpc.EthJsonRpcExt;
 import my.demo.blockchain_demo.service.shutdown.ApplicationShutdownManager;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,15 @@ public class BlockchainAccessor {
         return baseFeePerGas.multiply(BigInteger.TWO).add(MAX_PRIORITY_FEE_PER_GAS);
     }
 
-    public void go() throws Exception {
+    public MakeTrade getMakeTradeData(String txHash) throws Exception {
+        var tx = rpcClient.getTransaction(txHash);
+        var data = tx.getInput();
+        var makeTradeData = functionsHandler.parseMakeTrade(data);
+        log.trace("Data of {} parsed: {}",txHash, makeTradeData);
+        return makeTradeData;
+    }
+
+    public String callMakeTrade(String currency, long amount, long orderId, long code) throws Exception {
         var chainId = rpcClient.getChainId();
         log.trace("Chain id: {} ", chainId);
 
@@ -41,7 +50,7 @@ public class BlockchainAccessor {
         if (oracleBalance.compareTo(BigInteger.ZERO) == 0) {
             log.trace("Zero balance at {}", appConfiguration.oracleAddress());
             shutdownManager.initiateShutdown();
-            return;
+            return null;
         }
         log.trace("Balance at {}: {} ", appConfiguration.oracleAddress(), oracleBalance);
 
@@ -58,5 +67,6 @@ public class BlockchainAccessor {
         var hexValue = Numeric.toHexString(signedMessage);
         var hash = rpcClient.sendTransaction(hexValue);
         log.trace("Tx {} submitted", hash);
+        return hash;
     }
 }
