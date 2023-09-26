@@ -22,6 +22,8 @@ repositories {
 }
 
 dependencies {
+    implementation "org.web3j:core:4.9.7"
+    // defaults
     implementation 'org.springframework.boot:spring-boot-starter'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
