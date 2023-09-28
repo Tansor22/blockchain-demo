@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.core.BlockchainAccessor;
-import my.demo.blockchain_demo.service.core.domain.MakeTrade;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
@@ -22,7 +21,7 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
         // step 1
         //var txHash = accessor.callMakeTrade("matic", 1, 1, 1);
         // step 2
-        var txHash = "0x0958718079969fbe3b6abd35a9994264c732a093385d5c569a88af181aec1428";
+        var txHash = "0xd7146b0d67240b53ba8b9fb686422a1759fb83a8bf28f520c3a97713dd615c7d";
         var makeTradeData = accessor.getMakeTradeData(txHash);
     }
 }

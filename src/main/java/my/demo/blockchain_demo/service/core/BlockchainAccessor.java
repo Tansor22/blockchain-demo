@@ -3,7 +3,10 @@ package my.demo.blockchain_demo.service.core;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.configuration.AppConfiguration;
+import my.demo.blockchain_demo.service.core.domain.MakePayout;
 import my.demo.blockchain_demo.service.core.domain.MakeTrade;
+import my.demo.blockchain_demo.service.core.functions.FunctionsEncoder;
+import my.demo.blockchain_demo.service.core.functions.FunctionsParser;
 import my.demo.blockchain_demo.service.core.rpc.EthJsonRpcExt;
 import my.demo.blockchain_demo.service.shutdown.ApplicationShutdownManager;
 import org.springframework.stereotype.Service;
@@ -21,7 +24,8 @@ import java.math.BigInteger;
 public class BlockchainAccessor {
     private final EthJsonRpcExt rpcClient;
     private final AppConfiguration appConfiguration;
-    private final FunctionsHandler functionsHandler;
+    private final FunctionsEncoder functionsEncoder;
+    private final FunctionsParser functionsParser;
     private final ApplicationShutdownManager shutdownManager;
 
     // max gas to be burnt by transaction submitting, depends on size of input data
@@ -36,13 +40,33 @@ public class BlockchainAccessor {
 
     public MakeTrade getMakeTradeData(String txHash) throws Exception {
         var tx = rpcClient.getTransaction(txHash);
+        var txReceipt = rpcClient.getTransactionReceipt(txHash);
+        log.trace("Tx status: {}", txReceipt.getStatus());
         var data = tx.getInput();
-        var makeTradeData = functionsHandler.parseMakeTrade(data);
+        var makeTradeData = functionsParser.parseMakeTrade(data);
+        log.trace("Data of {} parsed: {}",txHash, makeTradeData);
+        return makeTradeData;
+    }
+
+    public MakePayout getMakePayoutData(String txHash) throws Exception {
+        var tx = rpcClient.getTransaction(txHash);
+        var data = tx.getInput();
+        var makeTradeData = functionsParser.parseMakePayout(data);
         log.trace("Data of {} parsed: {}",txHash, makeTradeData);
         return makeTradeData;
     }
 
     public String callMakeTrade(String currency, long amount, long orderId, long code) throws Exception {
+        var dataEncoded = functionsEncoder.encodeMakeTrade(currency, amount, orderId, code);
+        return call(dataEncoded);
+    }
+
+    public String callMakePayout(String address, String currency, long amount, long uniqueId) throws Exception {
+        var dataEncoded = functionsEncoder.encodeMakePayout(address, currency, amount, uniqueId);
+        return call(dataEncoded);
+    }
+
+    private String call(String data) throws Exception {
         var chainId = rpcClient.getChainId();
         log.trace("Chain id: {} ", chainId);
 
@@ -56,8 +80,6 @@ public class BlockchainAccessor {
 
         var nonce = rpcClient.getNonce(appConfiguration.oracleAddress());
         log.trace("Nonce for {}: {}", appConfiguration.oracleAddress(), nonce);
-
-        var data = functionsHandler.getMakeTradeData("matic", 1, 1, 1);
         // max priority fee per gas, max fee per gas
         var tx = RawTransaction.createTransaction(chainId, nonce, GAS_LIMIT, appConfiguration.smartContractAddress(),
                 BigInteger.ZERO, data, MAX_PRIORITY_FEE_PER_GAS, getMaxFeePerGas());
@@ -69,4 +91,5 @@ public class BlockchainAccessor {
         log.trace("Tx {} submitted", hash);
         return hash;
     }
+
 }
