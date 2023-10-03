@@ -22,6 +22,13 @@ public class EthJsonRpcExt extends JsonRpc2_0Web3j {
         return response.getTransactionCount();
     }
 
+    public String call(String from, String to, String data) throws IOException {
+        var request = org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(from, to, data);
+        var response = this.ethCall(request, DefaultBlockParameterName.LATEST).send();
+        checkResponse(response);
+        return response.getValue();
+    }
+
     public BigInteger getBalance(String address) throws IOException {
         var response = this.ethGetBalance(address, DefaultBlockParameterName.LATEST).send();
         checkResponse(response);

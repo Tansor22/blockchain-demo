@@ -21,7 +21,10 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
         // step 1
         //var txHash = accessor.callMakeTrade("matic", 1, 1, 1);
         // step 2
-        var txHash = "0xd7146b0d67240b53ba8b9fb686422a1759fb83a8bf28f520c3a97713dd615c7d";
-        var makeTradeData = accessor.getMakeTradeData(txHash);
+        //var txHash = "0xd7146b0d67240b53ba8b9fb686422a1759fb83a8bf28f520c3a97713dd615c7d";
+        //var makeTradeData = accessor.getMakeTradeData(txHash);
+        // step 3
+        var approvedCurrencies = accessor.getApprovedCurrencies();
+        log.info("Approved currecncies: {}", approvedCurrencies);
     }
 }

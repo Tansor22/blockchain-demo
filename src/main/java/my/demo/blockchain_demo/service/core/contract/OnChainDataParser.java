@@ -1,4 +1,4 @@
-package my.demo.blockchain_demo.service.core.functions;
+package my.demo.blockchain_demo.service.core.contract;
 
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
@@ -8,9 +8,7 @@ import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 
@@ -22,13 +20,13 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class FunctionsParser {
+public class OnChainDataParser {
     private final Map<String, Integer> CURRENCIES_BY_PRECISION =
             // todo precision for matic ??
             Map.of("usdt", 6, "matic", 18);
 
 
-    private List<Type> parseParams(String inputData, Event event) {
+    private List<Type> parseEventParams(String inputData, Event event) {
         if (inputData.length() < 10) {
             return Collections.emptyList();
         }
@@ -72,8 +70,27 @@ public class FunctionsParser {
         return null;
     }
 
+    public List<String> parseApprovedCurrencies(String data) {
+        var output = parseFunctionReturn(data, Constants.GET_APPROVED_CURRENCY_LIST);
+        return parseStringArray(output.get(0));
+    }
+
+    private List<String> parseStringArray(Type abiType) {
+        if (abiType instanceof DynamicArray<? extends Type> dynamicArray) {
+            return dynamicArray.getValue().stream()
+                    .map(this::parseString).toList();
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Incorrect type for input %s, should be <type>[].", abiType.getTypeAsString()));
+        }
+    }
+
+    private List<Type> parseFunctionReturn(String data, Function func) {
+        return FunctionReturnDecoder.decode(data, func.getOutputParameters());
+    }
+
     public MakeTrade parseMakeTrade(String data) {
-        var params = parseParams(data, FunctionsConstants.MAKE_TRADE);
+        var params = parseEventParams(data, Constants.MAKE_TRADE);
 
         var currency = parseString(params.get(0));
         var amount = parseAmount(params.get(1), currency);
@@ -85,7 +102,7 @@ public class FunctionsParser {
     }
 
     public MakePayout parseMakePayout(String data) {
-        var params = parseParams(data, FunctionsConstants.MAKE_PAYOUT);
+        var params = parseEventParams(data, Constants.MAKE_PAYOUT);
 
         var recipient = parseString(params.get(0));
 

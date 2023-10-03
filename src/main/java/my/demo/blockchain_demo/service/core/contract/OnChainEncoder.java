@@ -1,4 +1,4 @@
-package my.demo.blockchain_demo.service.core.functions;
+package my.demo.blockchain_demo.service.core.contract;
 
 import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
@@ -17,18 +17,24 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class FunctionsEncoder {
+public class OnChainEncoder {
     // supported package
     private static final String ABI_DATA_TYPES_PACKAGE = "org.web3j.abi.datatypes.generated";
 
     public String encodeMakeTrade(String currency, long amount, long orderId, long code){
-        return encodeEventWithParams(FunctionsConstants.MAKE_TRADE, currency, amount, orderId, code, 0);
+        return encodeEventWithParams(Constants.MAKE_TRADE, currency, amount, orderId, code, 0);
     }
 
     public String encodeMakePayout(String address, String currency, long amount, long uniqueId){
-        return encodeEventWithParams(FunctionsConstants.MAKE_TRADE, address, currency, amount, uniqueId);
+        return encodeEventWithParams(Constants.MAKE_TRADE, address, currency, amount, uniqueId);
     }
 
+    public String encodeGetApprovedCurrencies() {
+        return encodeFunctionCall(Constants.GET_APPROVED_CURRENCY_LIST);
+    }
+    private String encodeFunctionCall(Function func) {
+        return FunctionEncoder.encode(func);
+    }
     private String encodeEventWithParams(Event event, Object... params) {
         var eventParams = event.getParameters();
         Preconditions.checkArgument(eventParams.size() >= params.length, "Size of expected params should be greater or equal.");
