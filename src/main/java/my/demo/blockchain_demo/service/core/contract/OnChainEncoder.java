@@ -6,9 +6,7 @@ import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Event;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.*;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 
@@ -32,7 +30,27 @@ public class OnChainEncoder {
     public String encodeGetApprovedCurrencies() {
         return encodeFunctionCall(Constants.GET_APPROVED_CURRENCY_LIST);
     }
-    private String encodeFunctionCall(Function func) {
+
+    public Function getProposedCurrency(String currency) {
+        // getProposedCurrency(bytes32 _name) external view returns (CurrencyLib.Currency memory)
+        return new Function("getProposedCurrency",
+                List.of(bytes32(currency)),
+                List.of(new TypeReference<DynamicStruct>() {}));
+    }
+
+    public String encodeGetProposedCurrencies() {
+        return encodeFunctionCall(Constants.GET_PROPOSED_CURRENCY_LIST);
+    }
+
+    public String encodeProposeCurrency(String name, String contractAddress, long min, long max) {
+        // proposeCurrency(bytes32 _name, address _contractAddr, uint _minAmount, uint _maxAmount) external onlyTreasurer
+        var func = new Function("proposeCurrency",
+                List.of(),
+                List.of());
+        return encodeFunctionCall(func);
+
+    }
+    public String encodeFunctionCall(Function func) {
         return FunctionEncoder.encode(func);
     }
     private String encodeEventWithParams(Event event, Object... params) {

@@ -19,6 +19,11 @@ public class Constants {
             List.of(),
             List.of(new TypeReference<DynamicArray<Bytes32>>() {
     }));
+    // getProposedCurrencyList() external view returns (bytes32[] memory)
+    public static final Function GET_PROPOSED_CURRENCY_LIST = new Function("getProposedCurrencyList",
+            List.of(),
+            List.of(new TypeReference<DynamicArray<Bytes32>>() {
+    }));
 
     // makeTrade(bytes32 _currency, uint256 _amount, uint256 _orderId, uint256 _code, uint256 deadline)
     public static final Event MAKE_TRADE = new Event("makeTrade", List.of(

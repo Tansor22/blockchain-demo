@@ -75,6 +75,20 @@ public class OnChainDataParser {
         return parseStringArray(output.get(0));
     }
 
+    public List<String> parseProposedCurrencies(String data) {
+        var output = parseFunctionReturn(data, Constants.GET_PROPOSED_CURRENCY_LIST);
+        return parseStringArray(output.get(0));
+    }
+
+    public Map<String, ?> parseFunctionReturnAsMap(String data, Function func) {
+        var types =  parseFunctionReturn(data, func);
+        if (types == null) {
+            return Map.of();
+        }
+        return null;
+
+    }
+
     private List<String> parseStringArray(Type abiType) {
         if (abiType instanceof DynamicArray<? extends Type> dynamicArray) {
             return dynamicArray.getValue().stream()

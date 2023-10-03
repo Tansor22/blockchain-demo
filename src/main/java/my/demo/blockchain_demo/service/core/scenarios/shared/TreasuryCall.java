@@ -13,7 +13,7 @@ public abstract class TreasuryCall<R> extends SmartContractCall implements Scena
     }
 
     protected String submitTransaction(int treasury, String data) throws Exception {
-        Preconditions.checkArgument(0 >= treasury && treasury < appConfiguration.treasuries().size(),
+        Preconditions.checkArgument(0 <= treasury && treasury < appConfiguration.treasuries().size(),
                 "Not valid treasury");
         var treasuryInfo = appConfiguration.treasuries().get(treasury);
         var chainId = appConfiguration.chainId();
