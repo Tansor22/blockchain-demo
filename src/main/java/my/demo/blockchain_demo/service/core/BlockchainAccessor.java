@@ -40,7 +40,7 @@ public class BlockchainAccessor {
         return baseFeePerGas.multiply(BigInteger.TWO).add(MAX_PRIORITY_FEE_PER_GAS);
     }
 
-    public List<String> getApprovedCurrencies() throws Exception {
+    public List<String> getApprovedCurrencies() throws IOException {
         var data = onChainEncoder.encodeGetApprovedCurrencies();
         var result = rpcClient.call(appConfiguration.oracleAddress(), appConfiguration.smartContractAddress(), data);
 
