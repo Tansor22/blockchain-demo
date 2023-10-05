@@ -15,6 +15,7 @@ import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -41,7 +42,7 @@ public class SmartContractCall {
         if (balance.compareTo(BigInteger.ZERO) == 0) {
             log.trace("Zero balance at {}", from);
             shutdownManager.initiateShutdown();
-            return null;
+            throw new IllegalAccessException("Couldn't submit transaction.");
         }
         log.trace("Balance at {}: {} ", from, balance);
 

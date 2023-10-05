@@ -18,6 +18,7 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
     @SneakyThrows
     @Override
     public void onApplicationEvent(@NotNull final ApplicationReadyEvent event) {
+        log.info("Scenario: {}", scenario.getClass().getSimpleName());
         scenario.go();
     }
 }

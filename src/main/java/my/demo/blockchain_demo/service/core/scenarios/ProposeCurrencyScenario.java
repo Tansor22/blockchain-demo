@@ -12,6 +12,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Service
 @Slf4j
@@ -41,8 +43,8 @@ public class ProposeCurrencyScenario extends TreasuryCall {
 
         var currency = "matic";
         var contractAddress = appConfiguration.smartContractAddress();
-        var min = 1L;
-        var max = 1_000L;
+        var min = 10000000000000L;
+        var max = 10000000000000000L;
 
         var func = new ProposeCurrencyFunction(currency, contractAddress, min, max);
         var data = onChainEncoder.encodeFunction(func);
