@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class ApplicationStartup implements ApplicationListener<ApplicationReadyEvent> {
-    private final Scenario<?> scenario;
+    private final Scenario scenario;
 
     @SneakyThrows
     @Override

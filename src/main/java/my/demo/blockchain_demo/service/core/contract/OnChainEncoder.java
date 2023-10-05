@@ -2,14 +2,20 @@ package my.demo.blockchain_demo.service.core.contract;
 
 import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
+import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.*;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,69 +25,44 @@ public class OnChainEncoder {
     // supported package
     private static final String ABI_DATA_TYPES_PACKAGE = "org.web3j.abi.datatypes.generated";
 
-    public String encodeMakeTrade(String currency, long amount, long orderId, long code){
-        return encodeEventWithParams(Constants.MAKE_TRADE, currency, amount, orderId, code, 0);
+    public Function buildFunction(DeFiFunction deFiFunction) {
+        // fight against type erasure
+        List inputParams = buildInputParams(deFiFunction.input(), deFiFunction.inputParams());
+        List outputParams = deFiFunction.output();
+        return new Function(deFiFunction.name(), inputParams, outputParams);
     }
 
-    public String encodeMakePayout(String address, String currency, long amount, long uniqueId){
-        return encodeEventWithParams(Constants.MAKE_TRADE, address, currency, amount, uniqueId);
+    public String encodeFunction(DeFiFunction deFiFunction) {
+        var function = buildFunction(deFiFunction);
+        return FunctionEncoder.encode(function);
     }
 
-    public String encodeGetApprovedCurrencies() {
-        return encodeFunctionCall(Constants.GET_APPROVED_CURRENCY_LIST);
-    }
-
-    public Function getProposedCurrency(String currency) {
-        // getProposedCurrency(bytes32 _name) external view returns (CurrencyLib.Currency memory)
-        return new Function("getProposedCurrency",
-                List.of(bytes32(currency)),
-                List.of(new TypeReference<DynamicStruct>() {}));
-    }
-
-    public String encodeGetProposedCurrencies() {
-        return encodeFunctionCall(Constants.GET_PROPOSED_CURRENCY_LIST);
-    }
-
-    public String encodeProposeCurrency(String name, String contractAddress, long min, long max) {
-        // proposeCurrency(bytes32 _name, address _contractAddr, uint _minAmount, uint _maxAmount) external onlyTreasurer
-        var func = new Function("proposeCurrency",
-                List.of(),
-                List.of());
-        return encodeFunctionCall(func);
-
-    }
-    public String encodeFunctionCall(Function func) {
-        return FunctionEncoder.encode(func);
-    }
-    private String encodeEventWithParams(Event event, Object... params) {
-        var eventParams = event.getParameters();
-        Preconditions.checkArgument(eventParams.size() >= params.length, "Size of expected params should be greater or equal.");
+    private List<? extends Type> buildInputParams(List<Class<? extends Type>> typeClasses, List<Object> params) {
+        Preconditions.checkArgument(typeClasses.size() >= params.size(), "Size of expected params should be greater or equal.");
 
         var inputParams = new ArrayList<Type>();
-        for (int i = 0; i < eventParams.size(); i++) {
+        for (int i = 0; i < typeClasses.size(); i++) {
             try {
-                var type = abiTypeInstance(eventParams.get(i), params[i]);
+                var type = abiTypeInstance(typeClasses.get(i), params.get(i));
                 inputParams.add(type);
             } catch (IllegalArgumentException ex) {
                 throw new IllegalArgumentException(String.format("Problems with matching types of params with index %s. Root cause: %s",
                         i, ex.getMessage()), ex);
             }
         }
-
-        // with no output params yet
-        var func = new Function(event.getName(), inputParams, List.of());
-        return FunctionEncoder.encode(func);
+        return inputParams;
     }
 
-    private <T> Type abiTypeInstance(TypeReference<?> typeReference, T value) {
+    private <T> Type abiTypeInstance(Class<? extends Type> typeClass, T value) {
+        var typeReference = TypeReference.create(typeClass);
         var fullAbiTypeName = typeReference.getType().getTypeName();
-        Preconditions.checkArgument(fullAbiTypeName.startsWith(ABI_DATA_TYPES_PACKAGE), "Unsupported data type: {}", fullAbiTypeName);
-        // package name and 'dot'
-        var simpleAbiType = fullAbiTypeName.substring(ABI_DATA_TYPES_PACKAGE.length() + 1);
+        var simpleAbiTypeName = CommonUtils.cutToLast(fullAbiTypeName, '.');
 
-        var abiTypeInstance = switch (simpleAbiType) {
+        var abiTypeInstance = switch (simpleAbiTypeName) {
             case "Bytes32" -> bytes32(value);
             case "Uint256" -> uint256(value);
+            case "Address" -> address((String) value);
+            case "Uint" -> uint((Long) value);
             default -> throw new UnsupportedOperationException("Unsupported abi type: " + fullAbiTypeName);
         };
 
@@ -99,6 +80,14 @@ public class OnChainEncoder {
         } else {
             return null;
         }
+    }
+
+    private Type address(String value) {
+        return new Address(value);
+    }
+
+    private Type uint(long value) {
+        return new Uint(BigInteger.valueOf(value));
     }
 
     private <T> Type bytes32(T value) {

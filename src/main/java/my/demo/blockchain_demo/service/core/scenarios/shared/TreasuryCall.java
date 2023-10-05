@@ -7,7 +7,7 @@ import my.demo.blockchain_demo.service.core.contract.OnChainEncoder;
 import my.demo.blockchain_demo.service.core.rpc.EthJsonRpcExt;
 import my.demo.blockchain_demo.service.shutdown.ApplicationShutdownManager;
 
-public abstract class TreasuryCall<R> extends SmartContractCall implements Scenario<R> {
+public abstract class TreasuryCall extends SmartContractCall implements Scenario {
     protected TreasuryCall(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, OnChainEncoder onChainEncoder, OnChainDataParser onChainDataParser, ApplicationShutdownManager shutdownManager) {
         super(rpcClient, appConfiguration, onChainEncoder, onChainDataParser, shutdownManager);
     }

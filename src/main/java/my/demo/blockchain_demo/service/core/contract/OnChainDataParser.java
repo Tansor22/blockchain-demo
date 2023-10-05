@@ -2,13 +2,15 @@ package my.demo.blockchain_demo.service.core.contract;
 
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
-import my.demo.blockchain_demo.service.core.domain.MakePayout;
-import my.demo.blockchain_demo.service.core.domain.MakeTrade;
+import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
-import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.datatypes.*;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.DynamicArray;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 
@@ -26,17 +28,42 @@ public class OnChainDataParser {
             Map.of("usdt", 6, "matic", 18);
 
 
-    private List<Type> parseEventParams(String inputData, Event event) {
+    /**
+     * For debug.
+     * @param inputData
+     * @param deFiFunction
+     * @return
+     */
+
+    private List<Type> parseInputParams(String inputData, DeFiFunction deFiFunction) {
         if (inputData.length() < 10) {
             return Collections.emptyList();
         }
-        var methodId = inputData.substring(0, 10);
-        var methodSignature = EventEncoder.encode(event);
-        if (!methodId.equals(methodSignature.substring(0, 10))) {
-            return Collections.emptyList();
-        }
-        return FunctionReturnDecoder.decode(inputData.substring(10), event.getParameters());
+        List typeReferences = deFiFunction.input().stream()
+                .map(TypeReference::create)
+                .toList();
+
+        return FunctionReturnDecoder.decode(inputData.substring(10), typeReferences);
     }
+
+    public List<String> parseInputParamsAsStrings(String inputData, DeFiFunction deFiFunction) {
+        var types = parseInputParams(inputData, deFiFunction);
+        return types.stream()
+                .map(this::parseString)
+                .toList();
+    }
+
+    private List<Type> parseFunctionReturn(String data, DeFiFunction deFiFunction) {
+        return FunctionReturnDecoder.decode(data, deFiFunction.output());
+    }
+
+    public List<String> parseFunctionReturnAsStrings(String data, DeFiFunction deFiFunction) {
+        var types =  parseFunctionReturn(data, deFiFunction);
+        return types.stream()
+                .map(this::parseString)
+                .toList();
+    }
+
 
     private @Nullable String parseString(Type abiType) {
         if (abiType instanceof Bytes32 bytes32) {
@@ -45,11 +72,15 @@ public class OnChainDataParser {
             return new String(bytes, StandardCharsets.UTF_8);
         } else if (abiType instanceof Uint256 uint256) {
             return uint256.getValue().toString();
+        } else if (abiType instanceof Uint uint) {
+            return uint.getValue().toString();
         } else if (abiType instanceof Address address) {
             return address.getValue();
+        }  else if (abiType instanceof DynamicArray array) {
+            return String.join(", ", parseStringArray(array));
         } else {
             throw new IllegalArgumentException(
-                    String.format("Incorrect type for input %s, should be bytes32.", abiType.getTypeAsString()));
+                    String.format("Incorrect type for input %s.", abiType.getTypeAsString()));
         }
     }
 
@@ -70,25 +101,6 @@ public class OnChainDataParser {
         return null;
     }
 
-    public List<String> parseApprovedCurrencies(String data) {
-        var output = parseFunctionReturn(data, Constants.GET_APPROVED_CURRENCY_LIST);
-        return parseStringArray(output.get(0));
-    }
-
-    public List<String> parseProposedCurrencies(String data) {
-        var output = parseFunctionReturn(data, Constants.GET_PROPOSED_CURRENCY_LIST);
-        return parseStringArray(output.get(0));
-    }
-
-    public Map<String, ?> parseFunctionReturnAsMap(String data, Function func) {
-        var types =  parseFunctionReturn(data, func);
-        if (types == null) {
-            return Map.of();
-        }
-        return null;
-
-    }
-
     private List<String> parseStringArray(Type abiType) {
         if (abiType instanceof DynamicArray<? extends Type> dynamicArray) {
             return dynamicArray.getValue().stream()
@@ -97,33 +109,5 @@ public class OnChainDataParser {
             throw new IllegalArgumentException(
                     String.format("Incorrect type for input %s, should be <type>[].", abiType.getTypeAsString()));
         }
-    }
-
-    private List<Type> parseFunctionReturn(String data, Function func) {
-        return FunctionReturnDecoder.decode(data, func.getOutputParameters());
-    }
-
-    public MakeTrade parseMakeTrade(String data) {
-        var params = parseEventParams(data, Constants.MAKE_TRADE);
-
-        var currency = parseString(params.get(0));
-        var amount = parseAmount(params.get(1), currency);
-        var orderId = parseString(params.get(2));
-        var code = parseString(params.get(3));
-        var deadline = parseString(params.get(4));
-
-        return new MakeTrade(currency, amount, orderId, code, deadline);
-    }
-
-    public MakePayout parseMakePayout(String data) {
-        var params = parseEventParams(data, Constants.MAKE_PAYOUT);
-
-        var recipient = parseString(params.get(0));
-
-        var currency = parseString(params.get(1));
-        var amount = parseAmount(params.get(2), currency);
-        var uniqueId = parseString(params.get(3));
-
-        return new MakePayout(recipient, currency, amount, uniqueId);
     }
 }

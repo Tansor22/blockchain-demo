@@ -6,6 +6,22 @@ import java.util.Arrays;
 
 @UtilityClass
 public class CommonUtils {
+
+    public String cutToLast(String target, char symbol) {
+        int index = -1;
+        for (int i = target.length() - 1; i >= 0; i--) {
+            if (target.charAt(i) == symbol) {
+                index = i;
+                break;
+            }
+        }
+        if (index != -1) {
+            return target.substring(index + 1);
+        } else {
+            return target;
+        }
+    }
+
     public static byte[] padBytesWithZeros(byte[] bytes, int size) {
         if (bytes.length >= size) {
             return bytes;

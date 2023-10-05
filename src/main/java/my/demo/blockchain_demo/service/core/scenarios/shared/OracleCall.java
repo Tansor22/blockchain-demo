@@ -9,7 +9,7 @@ import my.demo.blockchain_demo.service.shutdown.ApplicationShutdownManager;
 
 import java.io.IOException;
 
-public abstract class OracleCall<R> extends SmartContractCall implements Scenario<R>{
+public abstract class OracleCall extends SmartContractCall implements Scenario{
     protected OracleCall(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, OnChainEncoder onChainEncoder, OnChainDataParser onChainDataParser, ApplicationShutdownManager shutdownManager) {
         super(rpcClient, appConfiguration, onChainEncoder, onChainDataParser, shutdownManager);
     }
