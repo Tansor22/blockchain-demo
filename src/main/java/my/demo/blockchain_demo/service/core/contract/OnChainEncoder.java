@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
@@ -22,9 +21,6 @@ import java.util.List;
 @Service
 @Slf4j
 public class OnChainEncoder {
-    // supported package
-    private static final String ABI_DATA_TYPES_PACKAGE = "org.web3j.abi.datatypes.generated";
-
     public Function buildFunction(DeFiFunction deFiFunction) {
         // fight against type erasure
         List inputParams = buildInputParams(deFiFunction.input(), deFiFunction.inputParams());

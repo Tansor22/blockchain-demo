@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.configuration.AppConfiguration;
 import my.demo.blockchain_demo.service.core.contract.OnChainDataParser;
 import my.demo.blockchain_demo.service.core.contract.OnChainEncoder;
-import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.contract.functions.ProposeCurrencyFunction;
 import my.demo.blockchain_demo.service.core.rpc.EthJsonRpcExt;
 import my.demo.blockchain_demo.service.core.scenarios.shared.TreasuryCall;
@@ -26,7 +25,11 @@ public class ProposeCurrencyScenario extends TreasuryCall {
         var tx = rpcClient.getTransaction(hash);
         var txReceipt = rpcClient.getTransactionReceipt(hash);
 
-        log.trace("Tx status: {}", txReceipt.getStatus());
+        if (txReceipt != null) {
+            log.trace("Tx status: {}", txReceipt.getStatus());
+        } else  {
+            log.trace("No receipt! Failed transaction {}", hash);
+        }
 
         var params = onChainDataParser.parseInputParamsAsStrings(tx.getInput(), func);
         log.trace("Parameters: {}", params);

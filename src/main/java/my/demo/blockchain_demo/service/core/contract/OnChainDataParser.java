@@ -1,10 +1,12 @@
 package my.demo.blockchain_demo.service.core.contract;
 
 import jakarta.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
+import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
@@ -16,13 +18,14 @@ import org.web3j.abi.datatypes.generated.Uint256;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class OnChainDataParser {
+    private OnChainEncoder encoder;
     private final Map<String, Integer> CURRENCIES_BY_PRECISION =
             // todo precision for matic ??
             Map.of("usdt", 6, "matic", 18);
@@ -30,20 +33,36 @@ public class OnChainDataParser {
 
     /**
      * For debug.
+     *
      * @param inputData
      * @param deFiFunction
      * @return
      */
 
     private List<Type> parseInputParams(String inputData, DeFiFunction deFiFunction) {
-        if (inputData.length() < 10) {
-            return Collections.emptyList();
+        if (isInputCorrect(inputData, deFiFunction)) {
+            List typeReferences = deFiFunction.input().stream()
+                    .map(TypeReference::create)
+                    .toList();
+            return FunctionReturnDecoder.decode(inputData.substring(10), typeReferences);
+        } else {
+            log.error("Input doesn't correspond to func {}", deFiFunction.name());
+            return List.of();
         }
-        List typeReferences = deFiFunction.input().stream()
-                .map(TypeReference::create)
-                .toList();
 
-        return FunctionReturnDecoder.decode(inputData.substring(10), typeReferences);
+    }
+
+    private boolean isInputCorrect(String inputData, DeFiFunction deFiFunction) {
+        if (inputData.length() < 10) {
+            return false;
+        }
+        var func = encoder.buildFunction(deFiFunction);
+
+        var methodId = inputData.substring(0, 10);
+
+        var methodSignature = FunctionEncoder.encode(func);
+        // input corresponds given func
+        return methodId.equals(methodSignature.substring(0, 10));
     }
 
     public List<String> parseInputParamsAsStrings(String inputData, DeFiFunction deFiFunction) {
@@ -58,7 +77,7 @@ public class OnChainDataParser {
     }
 
     public List<String> parseFunctionReturnAsStrings(String data, DeFiFunction deFiFunction) {
-        var types =  parseFunctionReturn(data, deFiFunction);
+        var types = parseFunctionReturn(data, deFiFunction);
         return types.stream()
                 .map(this::parseString)
                 .toList();
@@ -76,7 +95,7 @@ public class OnChainDataParser {
             return uint.getValue().toString();
         } else if (abiType instanceof Address address) {
             return address.getValue();
-        }  else if (abiType instanceof DynamicArray array) {
+        } else if (abiType instanceof DynamicArray array) {
             return String.join(", ", parseStringArray(array));
         } else {
             throw new IllegalArgumentException(
