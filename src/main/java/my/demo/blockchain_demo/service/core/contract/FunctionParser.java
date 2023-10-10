@@ -3,10 +3,12 @@ package my.demo.blockchain_demo.service.core.contract;
 import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import my.demo.blockchain_demo.service.core.contract.events.DeFiEvent;
+import my.demo.blockchain_demo.service.core.contract.events.DeFiEventsParam;
 import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
-import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
@@ -17,15 +19,15 @@ import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @Slf4j
 @AllArgsConstructor
-public class OnChainDataParser {
-    private OnChainEncoder encoder;
+public class FunctionParser {
+    private FunctionEncoder encoder;
     private final Map<String, Integer> CURRENCIES_BY_PRECISION =
             // todo precision for matic ??
             Map.of("usdt", 6, "matic", 18);
@@ -49,7 +51,25 @@ public class OnChainDataParser {
             log.error("Input doesn't correspond to func {}", deFiFunction.name());
             return List.of();
         }
+    }
 
+    public Map<String, String> parseEventParams(String inputData, DeFiEvent deFiEvent) {
+        if (isInputCorrect(inputData, deFiEvent)) {
+            var params = parseFunctionReturn(inputData, deFiEvent);
+
+            var output = new HashMap<String, String>(params.size());
+            for (var param : deFiEvent.params()) {
+                var index = param.index();
+                var type = params.get(index);
+                var value = parseString(type);
+
+                output.put(param.name(), value);
+            }
+            return output;
+        } else {
+            log.error("Input doesn't correspond to func {}", deFiEvent.name());
+            return Map.of();
+        }
     }
 
     private boolean isInputCorrect(String inputData, DeFiFunction deFiFunction) {
@@ -60,7 +80,20 @@ public class OnChainDataParser {
 
         var methodId = inputData.substring(0, 10);
 
-        var methodSignature = FunctionEncoder.encode(func);
+        var methodSignature = org.web3j.abi.FunctionEncoder.encode(func);
+        // input corresponds given func
+        return methodId.equals(methodSignature.substring(0, 10));
+    }
+
+    private boolean isInputCorrect(String inputData, DeFiEvent deFiEvent) {
+        if (inputData.length() < 10) {
+            return false;
+        }
+        var event = deFiEvent.toEvent();
+
+        var methodId = inputData.substring(0, 10);
+
+        var methodSignature = EventEncoder.encode(event);
         // input corresponds given func
         return methodId.equals(methodSignature.substring(0, 10));
     }
@@ -76,6 +109,13 @@ public class OnChainDataParser {
         return FunctionReturnDecoder.decode(data, deFiFunction.output());
     }
 
+    private List<Type> parseFunctionReturn(String data, DeFiEvent deFiEvent) {
+        List params = deFiEvent.params().stream()
+                .map(DeFiEventsParam::type)
+                .toList();
+        return FunctionReturnDecoder.decode(data, params);
+    }
+
     public List<String> parseFunctionReturnAsStrings(String data, DeFiFunction deFiFunction) {
         var types = parseFunctionReturn(data, deFiFunction);
         return types.stream()
@@ -86,9 +126,7 @@ public class OnChainDataParser {
 
     private @Nullable String parseString(Type abiType) {
         if (abiType instanceof Bytes32 bytes32) {
-            var rawBytes = bytes32.getValue();
-            var bytes = CommonUtils.removeTrailingZeros(rawBytes);
-            return new String(bytes, StandardCharsets.UTF_8);
+            return CommonUtils.paddedBytes32(bytes32.getValue());
         } else if (abiType instanceof Uint256 uint256) {
             return uint256.getValue().toString();
         } else if (abiType instanceof Uint uint) {

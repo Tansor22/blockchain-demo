@@ -6,14 +6,15 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.generated.Bytes32;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @AllArgsConstructor
-public class ApprovedProposedCurrency implements DeFiFunction{
+public class ApproveProposedCurrency implements DeFiFunction{
     private final String currency;
     private final String contractAddress;
-    private final long min;
-    private final long max;
+    private final BigInteger min;
+    private final BigInteger max;
     // approveProposedCurrency(bytes32 _name, address _contractAddr, uint _minAmount, uint _maxAmount) external onlyTreasurer
     @Override
     public String name() {

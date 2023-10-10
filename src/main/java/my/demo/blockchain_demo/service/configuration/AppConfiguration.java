@@ -29,4 +29,12 @@ public class AppConfiguration {
     private final long chainId;
     @NotEmpty
     private final List<TreasuryInfo> treasuries;
+    @NotEmpty
+    private final List<CoinInfo> coins;
+
+    public CoinInfo coin(String currency) {
+        return coins.stream().filter(c -> c.name().equals(currency))
+                .findFirst().orElse(null);
+    }
+
 }

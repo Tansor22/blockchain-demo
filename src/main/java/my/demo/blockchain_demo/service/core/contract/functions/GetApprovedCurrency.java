@@ -9,14 +9,13 @@ import org.web3j.abi.datatypes.generated.Bytes32;
 import java.util.List;
 
 @AllArgsConstructor
-public class GetProposedCurrency implements DeFiFunction {
+public class GetApprovedCurrency implements DeFiFunction{
     private final String currency;
 
-    // getProposedCurrency(bytes32 _name) external view returns (CurrencyLib.Currency memory)
-
+    // getApprovedCurrency(bytes32 _name) external view returns (CurrencyLib.Currency memory)
     @Override
     public String name() {
-        return "proposeCurrency";
+        return "getApprovedCurrency";
     }
 
     @Override

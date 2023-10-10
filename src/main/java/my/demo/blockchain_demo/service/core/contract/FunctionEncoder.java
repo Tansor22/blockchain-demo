@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
-import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
@@ -20,7 +19,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class OnChainEncoder {
+public class FunctionEncoder {
     public Function buildFunction(DeFiFunction deFiFunction) {
         // fight against type erasure
         List inputParams = buildInputParams(deFiFunction.input(), deFiFunction.inputParams());
@@ -30,7 +29,7 @@ public class OnChainEncoder {
 
     public String encodeFunction(DeFiFunction deFiFunction) {
         var function = buildFunction(deFiFunction);
-        return FunctionEncoder.encode(function);
+        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     private List<? extends Type> buildInputParams(List<Class<? extends Type>> typeClasses, List<Object> params) {
@@ -46,7 +45,28 @@ public class OnChainEncoder {
                         i, ex.getMessage()), ex);
             }
         }
+
+        log.trace("InputParams: {}", inputParams.stream().map(Type::getValue).map(this::view).toList());
         return inputParams;
+    }
+
+    private String view(Object obj) {
+        if (obj instanceof byte[] b) {
+            var sb = new StringBuilder(b.length);
+            for (int i = 0; i < b.length; i++) {
+                if(b[i] == (byte) 0) {
+                    sb.append(0);
+                } else {
+                    sb.append((char) b[i]).append(" ").append(b[i]).append(',');
+                }
+            }
+            if (sb.codePointAt(sb.length() - 1) == ',') {
+                return sb.deleteCharAt(sb.length() - 1).toString();
+            }
+            return sb.toString();
+        } else {
+            return obj.toString();
+        }
     }
 
     private <T> Type abiTypeInstance(Class<? extends Type> typeClass, T value) {
@@ -58,7 +78,7 @@ public class OnChainEncoder {
             case "Bytes32" -> bytes32(value);
             case "Uint256" -> uint256(value);
             case "Address" -> address((String) value);
-            case "Uint" -> uint((Long) value);
+            case "Uint" -> uint((BigInteger) value);
             default -> throw new UnsupportedOperationException("Unsupported abi type: " + fullAbiTypeName);
         };
 
@@ -73,6 +93,8 @@ public class OnChainEncoder {
             return new Uint256(longValue);
         } else if (value instanceof Integer intValue) {
             return new Uint256(intValue);
+        } else if (value instanceof BigInteger intValue) {
+            return new Uint256(intValue);
         } else {
             return null;
         }
@@ -82,15 +104,14 @@ public class OnChainEncoder {
         return new Address(value);
     }
 
-    private Type uint(long value) {
-        return new Uint(BigInteger.valueOf(value));
+    private Type uint(BigInteger value) {
+        return new Uint(value);
     }
 
     private <T> Type bytes32(T value) {
         if (value instanceof String stringValue) {
-            var stringBytes = stringValue.getBytes();
-            var paddedBytes = CommonUtils.padBytesWithZeros(stringBytes, 32);
-            return new Bytes32(paddedBytes);
+            var bytes =  CommonUtils.paddedBytes32(stringValue);
+            return new Bytes32(bytes);
         } else if (value instanceof byte[] bytesValue) {
             return new Bytes32(bytesValue);
         } else {
