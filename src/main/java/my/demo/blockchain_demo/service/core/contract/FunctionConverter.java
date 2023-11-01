@@ -25,11 +25,13 @@ public class FunctionConverter {
     public static final BigInteger MAX_PRIORITY_FEE_PER_GAS = BigInteger.valueOf(1_500_000_000);
 
     public RawTransaction convert(DeFiFunction func, BigInteger nonce) throws IOException {
+        return convert(encoder.encodeFunction(func), func.value(), nonce);
+    }
+
+    public RawTransaction convert(String data, BigInteger value, BigInteger nonce) throws IOException {
         var chainId = config.chainId();
-        var data = encoder.encodeFunction(func);
-        return RawTransaction.createTransaction(chainId, nonce, GAS_LIMIT, config.smartContractAddress(),
-                        func.value(), data,
-                        MAX_PRIORITY_FEE_PER_GAS, getMaxFeePerGas());
+        return RawTransaction.createTransaction(chainId, nonce, GAS_LIMIT, config.walletContractAddress(),
+                value, data, MAX_PRIORITY_FEE_PER_GAS, getMaxFeePerGas());
     }
 
     private BigInteger getMaxFeePerGas() throws IOException {

@@ -26,7 +26,7 @@ public class ApproveProposedCurrencyScenario extends TreasuryCall {
     @Override
     public void go() throws Exception {
         var currency = "matic";
-        var contractAddress = appConfiguration.smartContractAddress();
+        var contractAddress = appConfiguration.walletContractAddress();
         var min = BigInteger.valueOf(1L);
         var max = BigInteger.valueOf(1_000L);
 

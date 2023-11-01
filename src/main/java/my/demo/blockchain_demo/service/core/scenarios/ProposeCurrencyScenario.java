@@ -52,7 +52,7 @@ public class ProposeCurrencyScenario extends TreasuryCall {
         var currencyBytes = CommonUtils.padBytesEncodedWithZeros(currency.getBytes());
         var hex = Hex.encode(currencyBytes);
         // 0x7573647400000000000000000000000000000000000000000000000000000000
-        var contractAddress = appConfiguration.smartContractAddress();
+        var contractAddress = appConfiguration.walletContractAddress();
         var min = BigInteger.valueOf(10000000000000L);
         var max = BigInteger.valueOf(10000000000000000L);
 

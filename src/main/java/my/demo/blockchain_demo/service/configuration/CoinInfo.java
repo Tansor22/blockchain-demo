@@ -27,13 +27,17 @@ public class CoinInfo {
     @Positive
     private final BigDecimal max;
 
+    public BigDecimal amountFromHex(String hex) {
+        var cleanHex = hex.startsWith("0x") ? hex.substring(0, 2) : hex;
+        var bi = new BigInteger(cleanHex, 16);
+        return new BigDecimal(bi).movePointLeft(decimals);
+    }
+
     public BigInteger amount(double d) {
         return amount(BigDecimal.valueOf(d));
     }
+
     public BigInteger amount(BigDecimal bd) {
-        Preconditions.checkArgument(
-                bd.compareTo(min) >= 0 && bd.compareTo(max) <= 0,
-                "Amount %s should be %s <= 'amount' <= %s", bd, min, max);
         return bd.movePointRight(decimals).toBigInteger();
     }
 

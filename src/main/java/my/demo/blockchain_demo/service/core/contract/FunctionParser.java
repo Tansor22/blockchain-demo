@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.service.core.contract.events.DeFiEvent;
 import my.demo.blockchain_demo.service.core.contract.events.DeFiEventsParam;
+import my.demo.blockchain_demo.service.core.contract.events.Trade;
 import my.demo.blockchain_demo.service.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.service.core.utils.CommonUtils;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,11 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.tx.Contract;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +57,31 @@ public class FunctionParser {
         }
     }
 
+    public Map<String, String> parseEventLog(Log l, DeFiEvent deFiEvent) {
+        var eventValues = Contract.staticExtractEventParameters(deFiEvent.toEvent(), l);
+        if (eventValues != null) {
+            var output = new HashMap<String, String>();
+            var paramsSorted = deFiEvent.params().stream()
+                    .sorted(Comparator.comparingInt(DeFiEventsParam::index))
+                    .toList();
+            int indexed = 0;
+            int nonIndexed = 0;
+            for (var param : paramsSorted) {
+                if (param.type().isIndexed()) {
+                    var value = eventValues.getIndexedValues().get(indexed++);
+                    output.put(param.name(), parseString(value));
+                } else {
+                    var value = eventValues.getNonIndexedValues().get(nonIndexed++);
+                    output.put(param.name(), parseString(value));
+                }
+            }
+            return output;
+        } else {
+            log.error("Input doesn't correspond to event {}", deFiEvent.name());
+            return Map.of();
+        }
+    }
+
     public Map<String, String> parseEventParams(String inputData, DeFiEvent deFiEvent) {
         if (isInputCorrect(inputData, deFiEvent)) {
             var params = parseFunctionReturn(inputData, deFiEvent);
@@ -67,7 +96,7 @@ public class FunctionParser {
             }
             return output;
         } else {
-            log.error("Input doesn't correspond to func {}", deFiEvent.name());
+            log.error("Input doesn't correspond to event {}", deFiEvent.name());
             return Map.of();
         }
     }
@@ -89,11 +118,9 @@ public class FunctionParser {
         if (inputData.length() < 10) {
             return false;
         }
-        var event = deFiEvent.toEvent();
-
         var methodId = inputData.substring(0, 10);
 
-        var methodSignature = EventEncoder.encode(event);
+        var methodSignature = EventEncoder.encode(deFiEvent.toEvent());
         // input corresponds given func
         return methodId.equals(methodSignature.substring(0, 10));
     }
@@ -111,6 +138,7 @@ public class FunctionParser {
 
     private List<Type> parseFunctionReturn(String data, DeFiEvent deFiEvent) {
         List params = deFiEvent.params().stream()
+                .sorted(Comparator.comparingInt(DeFiEventsParam::index))
                 .map(DeFiEventsParam::type)
                 .toList();
         return FunctionReturnDecoder.decode(data, params);

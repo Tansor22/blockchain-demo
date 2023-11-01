@@ -5,12 +5,19 @@ import my.demo.blockchain_demo.service.configuration.AppConfiguration;
 import my.demo.blockchain_demo.service.core.contract.FunctionConverter;
 import my.demo.blockchain_demo.service.core.contract.FunctionParser;
 import my.demo.blockchain_demo.service.core.contract.FunctionEncoder;
+import my.demo.blockchain_demo.service.core.contract.events.DeFiEvent;
+import my.demo.blockchain_demo.service.core.contract.events.LogFeeTransfer;
+import my.demo.blockchain_demo.service.core.contract.events.Trade;
 import my.demo.blockchain_demo.service.core.contract.functions.MakeTradeFunction;
 import my.demo.blockchain_demo.service.core.rpc.EthJsonRpcExt;
 import my.demo.blockchain_demo.service.core.scenarios.shared.OracleCall;
 import my.demo.blockchain_demo.service.shutdown.ApplicationShutdownManager;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
+import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Contract;
 
 import java.math.BigInteger;
 
@@ -29,8 +36,8 @@ public class MakeTradeScenario extends OracleCall {
     public void go() throws Exception {
         // dummy yet
         var coin = appConfiguration.coin("matic");
-        var amount = coin.amount(.03);
-        var orderId = BigInteger.valueOf(111);
+        var amount = coin.amount(.04);
+        var orderId = BigInteger.valueOf(112);
         var code = BigInteger.valueOf(1111);
         var deadline = BigInteger.ZERO;
         // create on chain
@@ -46,11 +53,13 @@ public class MakeTradeScenario extends OracleCall {
         var txReceipt = rpcClient.getTransactionReceipt(txHash);
         if (txReceipt != null) {
             log.trace("Tx status: {}", txReceipt.getStatus());
+            parseLogs(txReceipt, new Trade());
         } else {
             log.error("No transaction receipt!");
         }
         var data = tx.getInput();
         var parsed = parser.parseInputParamsAsStrings(data, func);
         log.trace("Submitted params: {}", parsed);
+       
     }
 }

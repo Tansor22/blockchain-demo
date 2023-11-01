@@ -23,6 +23,8 @@ repositories {
 
 dependencies {
     implementation "org.web3j:core:4.9.7"
+    implementation 'org.apache.commons:commons-lang3:3.0'
+
     // defaults
     implementation 'org.springframework.boot:spring-boot-starter'
     // javax validation api

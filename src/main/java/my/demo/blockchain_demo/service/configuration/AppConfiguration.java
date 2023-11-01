@@ -24,7 +24,7 @@ public class AppConfiguration {
     @NotEmpty
     private final String oraclePrivateKey;
     @NotEmpty
-    private final String smartContractAddress;
+    private final String walletContractAddress;
     @NotNull
     private final long chainId;
     @NotEmpty
