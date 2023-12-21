@@ -1,6 +1,5 @@
 package my.demo.blockchain_demo.configuration;
 
-import com.google.common.base.Preconditions;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -40,8 +39,9 @@ public class CoinInfo {
     public BigInteger amount(BigDecimal bd) {
         return bd.movePointRight(decimals).toBigInteger();
 
-    }  public BigInteger amount(BigInteger bi) {
-        return amount(new BigDecimal(bi));
+    }
+    public BigDecimal amount(BigInteger bi) {
+        return new BigDecimal(bi).movePointLeft(decimals);
     }
 
     public BigInteger minEncoded() {
