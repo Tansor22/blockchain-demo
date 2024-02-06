@@ -2,6 +2,13 @@
 Project created for demonstration purposes. Spring based,  written in script-like style, 
 it depicts how to interact with ethereum blockchain.
 
+## Demo struct
+
+![](info/static/struct.png)
+
+## App architecture
+![](info/static/app-uml.png)
+
 ##  Core function
 Interacts with blockchain via RPC and is integrated with wallet smart contract.
 
