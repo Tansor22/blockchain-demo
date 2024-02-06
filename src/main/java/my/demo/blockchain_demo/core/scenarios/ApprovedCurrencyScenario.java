@@ -8,6 +8,7 @@ import my.demo.blockchain_demo.core.contract.FunctionConverter;
 import my.demo.blockchain_demo.core.contract.FunctionEncoder;
 import my.demo.blockchain_demo.core.contract.FunctionParser;
 import my.demo.blockchain_demo.core.rpc.EthJsonRpcExt;
+import my.demo.blockchain_demo.core.scenarios.shared.Scenario;
 import my.demo.blockchain_demo.core.wallet.Wallet;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "scenario", havingValue = "approvedCurrency")
-public class ApprovedCurrencyScenario extends OracleCall {
+public class ApprovedCurrencyScenario extends OracleCall implements Scenario {
     private final Wallet readOnlyWallet;
 
     protected ApprovedCurrencyScenario(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, FunctionEncoder encoder, FunctionParser parser, FunctionConverter converter, Wallet readOnlyWallet) {

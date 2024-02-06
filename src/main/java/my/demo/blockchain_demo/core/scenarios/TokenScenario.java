@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.demo.blockchain_demo.configuration.AppConfiguration;
 import my.demo.blockchain_demo.core.scenarios.shared.Scenario;
-import my.demo.blockchain_demo.core.tokens.DummyToken;
+import my.demo.blockchain_demo.core.wallet.tokens.DummyToken;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.Web3j;

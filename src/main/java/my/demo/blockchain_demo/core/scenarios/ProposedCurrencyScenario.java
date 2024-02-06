@@ -8,13 +8,14 @@ import my.demo.blockchain_demo.core.contract.FunctionParser;
 import my.demo.blockchain_demo.core.contract.functions.GetProposedCurrency;
 import my.demo.blockchain_demo.core.rpc.EthJsonRpcExt;
 import my.demo.blockchain_demo.core.scenarios.shared.OracleCall;
+import my.demo.blockchain_demo.core.scenarios.shared.Scenario;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "scenario", havingValue = "proposedCurrency")
-public class ProposedCurrencyScenario extends OracleCall {
+public class ProposedCurrencyScenario extends OracleCall implements Scenario {
 
 
     protected ProposedCurrencyScenario(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, FunctionEncoder encoder, FunctionParser parser, FunctionConverter converter) {

@@ -9,13 +9,14 @@ import my.demo.blockchain_demo.core.contract.FunctionEncoder;
 import my.demo.blockchain_demo.core.contract.FunctionParser;
 import my.demo.blockchain_demo.core.contract.functions.MakePayoutFunction;
 import my.demo.blockchain_demo.core.rpc.EthJsonRpcExt;
+import my.demo.blockchain_demo.core.scenarios.shared.Scenario;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "scenario", havingValue = "makePayout")
-public class MakePayoutScenario extends OracleCall {
+public class MakePayoutScenario extends OracleCall implements Scenario {
 
     protected MakePayoutScenario(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, FunctionEncoder encoder, FunctionParser parser, FunctionConverter converter) {
         super(rpcClient, appConfiguration, encoder, parser, converter);

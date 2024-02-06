@@ -1,4 +1,4 @@
-package my.demo.blockchain_demo.core.contract;
+package my.demo.blockchain_demo.core.wallet.utils;
 
 import lombok.SneakyThrows;
 import org.web3j.abi.TypeReference;

@@ -9,6 +9,7 @@ import my.demo.blockchain_demo.core.contract.FunctionParser;
 import my.demo.blockchain_demo.core.contract.events.Trade;
 import my.demo.blockchain_demo.core.contract.functions.MakeTradeFunction;
 import my.demo.blockchain_demo.core.rpc.EthJsonRpcExt;
+import my.demo.blockchain_demo.core.scenarios.shared.Scenario;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.math.BigInteger;
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "scenario", havingValue = "makeTrade")
-public class MakeTradeScenario extends OracleCall {
+public class MakeTradeScenario extends OracleCall implements Scenario {
 
     protected MakeTradeScenario(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, FunctionEncoder encoder, FunctionParser parser, FunctionConverter converter) {
         super(rpcClient, appConfiguration, encoder, parser, converter);

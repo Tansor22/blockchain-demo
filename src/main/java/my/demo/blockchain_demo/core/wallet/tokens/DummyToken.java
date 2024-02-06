@@ -1,6 +1,6 @@
-package my.demo.blockchain_demo.core.tokens;
+package my.demo.blockchain_demo.core.wallet.tokens;
 
-import my.demo.blockchain_demo.core.contract.ContractEx;
+import my.demo.blockchain_demo.core.wallet.utils.ContractEx;
 import org.web3j.abi.datatypes.Uint;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;

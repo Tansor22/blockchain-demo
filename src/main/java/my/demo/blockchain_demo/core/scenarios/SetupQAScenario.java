@@ -10,6 +10,7 @@ import my.demo.blockchain_demo.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.core.contract.functions.GetApprovedCurrency;
 import my.demo.blockchain_demo.core.contract.functions.GetProposedCurrency;
 import my.demo.blockchain_demo.core.rpc.EthJsonRpcExt;
+import my.demo.blockchain_demo.core.scenarios.shared.Scenario;
 import my.demo.blockchain_demo.core.scenarios.shared.TreasuryCall;
 import my.demo.blockchain_demo.core.utils.CommonUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -22,7 +23,7 @@ import java.util.List;
 @Service
 @Slf4j
 @ConditionalOnProperty(value = "scenario", havingValue = "setupQA")
-public class SetupQAScenario extends TreasuryCall {
+public class SetupQAScenario extends TreasuryCall implements Scenario {
 
     protected SetupQAScenario(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, FunctionEncoder encoder, FunctionParser parser, FunctionConverter converter) {
         super(rpcClient, appConfiguration, encoder, parser, converter);

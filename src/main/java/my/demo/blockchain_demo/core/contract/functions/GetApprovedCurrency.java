@@ -1,7 +1,7 @@
 package my.demo.blockchain_demo.core.contract.functions;
 
 import lombok.AllArgsConstructor;
-import my.demo.blockchain_demo.core.scenarios.shared.Currency;
+import my.demo.blockchain_demo.core.wallet.entity.Currency;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Bytes32;

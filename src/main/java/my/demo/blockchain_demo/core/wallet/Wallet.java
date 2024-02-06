@@ -1,8 +1,8 @@
 package my.demo.blockchain_demo.core.wallet;
 
 import lombok.SneakyThrows;
-import my.demo.blockchain_demo.core.contract.AbiUtils;
-import my.demo.blockchain_demo.core.contract.ContractEx;
+import my.demo.blockchain_demo.core.wallet.utils.AbiUtils;
+import my.demo.blockchain_demo.core.wallet.utils.ContractEx;
 import my.demo.blockchain_demo.core.wallet.entity.Currency;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Address;

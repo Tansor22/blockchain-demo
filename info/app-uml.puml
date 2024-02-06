@@ -1,0 +1,29 @@
+@startuml
+
+
+package core.contract {
+class FunctionEncoder
+class FunctionParser
+class FunctionConverter
+package functions {
+    note "set of functions" as n3
+}
+
+
+}
+note "Reinvented wheel, for demonstration only." as n1
+core.contract .. n1
+
+
+
+
+package core.wallet {
+class Wallet
+
+}
+note "Web3j implementation, recommended apporach." as n2
+core.wallet .. n2
+
+
+
+@enduml

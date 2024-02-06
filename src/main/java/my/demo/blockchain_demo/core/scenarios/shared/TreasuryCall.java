@@ -9,7 +9,7 @@ import my.demo.blockchain_demo.core.contract.FunctionParser;
 import my.demo.blockchain_demo.core.contract.functions.DeFiFunction;
 import my.demo.blockchain_demo.core.rpc.EthJsonRpcExt;
 
-public abstract class TreasuryCall extends SmartContractCall implements Scenario {
+public abstract class TreasuryCall extends SmartContractCall {
 
     protected TreasuryCall(EthJsonRpcExt rpcClient, AppConfiguration appConfiguration, FunctionEncoder encoder, FunctionParser parser, FunctionConverter converter) {
         super(rpcClient, appConfiguration, encoder, parser, converter);

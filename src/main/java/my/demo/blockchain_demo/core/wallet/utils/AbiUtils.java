@@ -1,4 +1,4 @@
-package my.demo.blockchain_demo.core.contract;
+package my.demo.blockchain_demo.core.wallet.utils;
 
 import lombok.experimental.UtilityClass;
 import org.web3j.abi.datatypes.generated.Bytes32;

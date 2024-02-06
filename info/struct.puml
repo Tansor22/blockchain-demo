@@ -1,0 +1,21 @@
+'https://plantuml.com/ru/component-diagram
+@startuml
+
+() HTTP as http_rpc
+[Blockchain demo] as demo
+[Node provider] as rpc
+
+cloud {
+    [DeFi contract] as spender
+    [Token] as token
+}
+
+
+demo -down-> http_rpc
+rpc -left- http_rpc
+
+rpc --> spender : uses
+rpc --> token : uses
+spender -right-> token
+
+@enduml
